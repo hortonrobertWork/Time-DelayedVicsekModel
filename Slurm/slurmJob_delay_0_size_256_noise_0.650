@@ -1,0 +1,15 @@
+#!/bin/bash
+# execution cue
+#SBATCH -p batch
+# one node:
+#SBATCH -N 1
+# maximum number of tasks per node:
+#SBATCH -n 1
+#SBATCH -t 48:00:00
+#SBATCH --mem-per-cpu=1000
+# file for error messages
+#SBATCH -e output=Slurmjob_%N_%j.stderr
+# file for normal output
+#SBATCH --output=Slurmjob_%N_%j.out
+cd /scratch/fermi/horton/Paper/main1/src/
+./main.out 131072 0.650 0 ../data7/observables/delay_0/ ../data7/snapshot/delay_0/
