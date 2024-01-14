@@ -1,40 +1,39 @@
-void record_snapshot(std::ofstream& outputfile_snapshot,int dim, int agent_number,
-    double noise_strenght,
+void recordSnapshot(std::ofstream& outputfileSnapshot,int dim, int agentNumber,
+    double noiseStrength,
     std::vector<std::vector<double> > positions,
     std::vector<std::vector<double> > angles)
 {
 
-        outputfile_snapshot << "Noise:"<< noise_strenght << '\n';
-        for (int agent_ind = 0; agent_ind < agent_number; agent_ind ++)
+        outputfileSnapshot << "Noise:"<< noiseStrength << '\n';
+        for (int agent_ind = 0; agent_ind < agentNumber; agent_ind ++)
         {
             
-            outputfile_snapshot << agent_ind << "\t";
+            outputfileSnapshot << agent_ind << "\t";
             
             // write all position coordinates into file
             for (int dim_ind = 0; dim_ind < dim; dim_ind++)
             {
-                outputfile_snapshot << positions[agent_ind][dim_ind] << "\t";
+                outputfileSnapshot << positions[agent_ind][dim_ind] << "\t";
             }
             
             // write all angular components into file
             for (int dim_ind = 0; dim_ind < dim-1; dim_ind++)
             {
-                outputfile_snapshot << angles[agent_ind][dim_ind] << "\t";
+                outputfileSnapshot << angles[agent_ind][dim_ind] << "\t";
             }
             
             // go to next line and treat next agent
-            outputfile_snapshot << std::endl;
+            outputfileSnapshot << std::endl;
         }
 }
 
-
-void recordFrameSteadyState(std::ofstream& outputfile, int agent_number,
-    double time_step, double timerecord_step, double time,  int dim,
+void recordFrameSteadyState(std::ofstream& outputfile, int agentNumber,
+    double timeStep, double timerecordStep, double time,  int dim,
     std::vector<std::vector<double> > positions,
     std::vector<std::vector<double> > angles)
 {
     {
-        for (int agent_ind = 0; agent_ind < agent_number; agent_ind ++)
+        for (int agent_ind = 0; agent_ind < agentNumber; agent_ind ++)
         {
             outputfile << time << "\t" << agent_ind << "\t";
             
@@ -55,44 +54,36 @@ void recordFrameSteadyState(std::ofstream& outputfile, int agent_number,
         }
     }
 }
-
-
-
-
-void distantDependentCorrelationFunction(std::ofstream& outputCorrelation, std::vector<std::vector<double> > positions, 
-    std::vector<std::vector<double> > angles, 
-    double time, int agent_number, double velocity)
+void recordAnimaion(std::ofstream& outputfile, int agentNumber,  int dim,
+    std::vector<std::vector<double> > positions,
+    std::vector<std::vector<double> > angles)
+{
     {
-    const std::complex<double> i(0,1);
-    std::complex<double> averageVelocity = 0;
-    std::vector<std::vector<double> > fluctuationAngles(agent_number, std::vector<double>(1));
-    double x=0; 
-    double y=0;
-    double orderParameter = 0;
-    double orderParameter1 = 0.0;
-    double orderParameter2 = 0.0;
-    double orderParameter4 = 0.0;
-
-    for (int j = 0; j < agent_number; j++)
-    {   
-        
-        averageVelocity += std::polar(velocity, angles[j][0]);
-
+        for (int agent_ind = 0; agent_ind < agentNumber/8; agent_ind ++)
+        {
+            outputfile << agent_ind << "\t";
+            
+            // write all position coordinates into file
+            for (int dim_ind = 0; dim_ind < dim; dim_ind++)
+            {
+                outputfile << positions[agent_ind][dim_ind] << "\t";
+            }
+            
+            // write all angular components into file
+            for (int dim_ind = 0; dim_ind < dim-1; dim_ind++)
+            {
+                outputfile << angles[agent_ind][dim_ind] << "\t";
+            }
+            
+            // go to next line and treat next agent
+            outputfile << std::endl;
+        }
     }
+}
 
-    orderParameter = std::abs(averageVelocity)/static_cast<double>(agent_number);
-    orderParameter += orderParameter;
-    orderParameter2 += orderParameter * orderParameter;
-    orderParameter4 += orderParameter * orderParameter * orderParameter * orderParameter;
-
-
-    
-    outputCorrelation << time << '\t' << orderParameter << '\t'  << orderParameter2 << '\t' << orderParameter4;
-    outputCorrelation << std::endl;
-    }
 
 float orderParameterCalculation(std::vector<std::vector<double> > positions, 
-    std::vector<std::vector<double> > angles, int agent_number, double velocity)
+    std::vector<std::vector<double> > angles, int agentNumber, double velocity)
     {
     const std::complex<double> i(0,1);
     std::complex<double> averageVelocity = 0;
@@ -103,14 +94,14 @@ float orderParameterCalculation(std::vector<std::vector<double> > positions,
     double orderParameter2 = 0.0;
     double orderParameter4 = 0.0;
 
-    for (int j = 0; j < agent_number; j++)
+    for (int j = 0; j < agentNumber; j++)
     {   
         
         averageVelocity += std::polar(1.0, angles[j][0]);
 
     }
 
-    orderParameter = std::abs(averageVelocity)/static_cast<double>(agent_number);
+    orderParameter = std::abs(averageVelocity)/static_cast<double>(agentNumber);
     
     return orderParameter;
     }

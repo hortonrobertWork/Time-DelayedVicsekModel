@@ -1,34 +1,34 @@
 
 // initialisation/reset of subspace container
-std::vector<std::vector<std::vector<int> > > subspace_init(
-        int subspacing_number, int expected_agentnumber_per_subspace)
+std::vector<std::vector<std::vector<int> > > initialiseSubspace(
+        int subspacingNumber, int expectedAgentNumberPerSubspace)
 {
     // create empty subspace container
-    std::vector < std::vector < std::vector < int > > > subspace_allocation(
-            subspacing_number, std::vector < std::vector < int > > (
-                    subspacing_number, std::vector<int>() //expected_agentnumber_per_subspace * 5)
+    std::vector < std::vector < std::vector < int > > > subspaceAllocation(
+            subspacingNumber, std::vector < std::vector < int > > (
+                    subspacingNumber, std::vector<int>() //expectedAgentNumberPerSubspace * 5)
             )
     );
-    return subspace_allocation;
+    return subspaceAllocation;
 }
 
 
 
 // allocate agent_indices to subspaces
-void allocate_to_subspace(
-        std::vector<std::vector<std::vector<int> > > &subspace_allocation, // pass by ref
-        double neighborhood_radius, int agent_number,
+void allocateToSubspace(
+        std::vector<std::vector<std::vector<int> > > &subspaceAllocation, // pass by ref
+        double neighbourhoodRadius, int agentNumber,
         std::vector<std::vector<double> > positions, bool debug)
 {
   // allocate all agents to subboxes
-  for (int agent_ind = 0; agent_ind < agent_number; agent_ind++)
+  for (int agentIndex = 0; agentIndex < agentNumber; agentIndex++)
   {
       // subbox pos = integer division of position by subbox spacing (nbhood radius)
       // Caution: dim = 2 hard-coded here
-      int subspace_xcoord = static_cast<int> (floor(positions[agent_ind][0] / neighborhood_radius) );
-      int subspace_ycoord = static_cast<int> (floor(positions[agent_ind][1] / neighborhood_radius) );
+      int subspaceXCoordinate = static_cast<int> (floor(positions[agentIndex][0] / neighbourhoodRadius) );
+      int subspaceYCoordinate = static_cast<int> (floor(positions[agentIndex][1] / neighbourhoodRadius) );
 
-      subspace_allocation[subspace_xcoord][subspace_ycoord].push_back(agent_ind);
+      subspaceAllocation[subspaceXCoordinate][subspaceYCoordinate].push_back(agentIndex);
   }
 }
 
@@ -36,163 +36,163 @@ void allocate_to_subspace(
 
 // determine which subspace cells neighbor a certain cell
 // first 2 dim: coord. of subspace cell, 3rd dim: neighbor index, 4th dim: array of (x,y) information of neighbors
-std::vector < std::vector < std::vector < std::vector<int> > > > get_subspace_cell_neighbors(
-        bool pbc, int subspacing_number, int dim, bool debug)
+std::vector < std::vector < std::vector < std::vector<int> > > > getSubspaceCellNeighbours(
+        bool periodicBoundaryConditions, int subspacingNumber, int dim, bool debug)
 {
     // create empty subspace container
-    std::vector < std::vector < std::vector < std::vector < int > > > > subspace_cell_neighbors(
-            subspacing_number, std::vector < std::vector < std::vector < int > > >(
-                    subspacing_number, std::vector< std::vector< int> >(
+    std::vector < std::vector < std::vector < std::vector < int > > > > subspaceCellNeighbours(
+            subspacingNumber, std::vector < std::vector < std::vector < int > > >(
+                    subspacingNumber, std::vector< std::vector< int> >(
                             std::pow(dim+1, 2), std::vector <int>(dim)
                     )
             )
     );
 
     // iterate through subspace grid
-    for (int subspace_xcoord = 0; subspace_xcoord < subspacing_number; subspace_xcoord++)
+    for (int subspaceXCoordinate = 0; subspaceXCoordinate < subspacingNumber; subspaceXCoordinate++)
     {
-        for (int subspace_ycoord = 0; subspace_ycoord < subspacing_number; subspace_ycoord++)
+        for (int subspaceYCoordinate = 0; subspaceYCoordinate < subspacingNumber; subspaceYCoordinate++)
         {
-            if (debug){std::cout<< "\n******CELL_NB\nx: " << subspace_xcoord << "\ty: " << subspace_ycoord << std::endl;}
+            if (debug){std::cout<< "\n******CELL_NB\nx: " << subspaceXCoordinate << "\ty: " << subspaceYCoordinate << std::endl;}
 
             // store for each cell of subspace itself and its neighbors for neighborhood search
             // in 2D: +/-1 in x and y directions
-            int neighbor_ind = 0; // we have 9 neighbors (including cell itself) in 2D
+            int neighbourIndex = 0; // we have 9 neighbors (including cell itself) in 2D
 
-            for (int nbcell_xdim_ind = subspace_xcoord - 1;
-                 nbcell_xdim_ind < subspace_xcoord + 2;
-                 nbcell_xdim_ind++)
+            for (int neighbourCellXIndex = subspaceXCoordinate - 1;
+                 neighbourCellXIndex < subspaceXCoordinate + 2;
+                 neighbourCellXIndex++)
             {
-                for (int nbcell_ydim_ind = subspace_ycoord - 1;
-                     nbcell_ydim_ind < subspace_ycoord + 2;
-                     nbcell_ydim_ind++)
+                for (int neighbourCellYIndex = subspaceYCoordinate - 1;
+                     neighbourCellYIndex < subspaceYCoordinate + 2;
+                     neighbourCellYIndex++)
                 {
-                    //std::cout << "was x: " << nbcell_xdim_ind <<
-                    //"\ty: " << nbcell_ydim_ind << std::endl;
+                    //std::cout << "was x: " << neighbourCellXIndex <<
+                    //"\ty: " << neighbourCellYIndex << std::endl;
                     // treat periodic boundary conditions for each dimension (hardcoded!)
                     // x
-                    if (nbcell_xdim_ind < 0 && pbc)
+                    if (neighbourCellXIndex < 0 && periodicBoundaryConditions)
                     {
-                        subspace_cell_neighbors[subspace_xcoord][subspace_ycoord][neighbor_ind][0] =
-                                nbcell_xdim_ind + subspacing_number;
+                        subspaceCellNeighbours[subspaceXCoordinate][subspaceYCoordinate][neighbourIndex][0] =
+                                neighbourCellXIndex + subspacingNumber;
                     }
-                    else if (nbcell_xdim_ind > subspacing_number-1 && pbc)
+                    else if (neighbourCellXIndex > subspacingNumber-1 && periodicBoundaryConditions)
                     {
-                        subspace_cell_neighbors[subspace_xcoord][subspace_ycoord][neighbor_ind][0] =
-                                nbcell_xdim_ind - subspacing_number;
+                        subspaceCellNeighbours[subspaceXCoordinate][subspaceYCoordinate][neighbourIndex][0] =
+                                neighbourCellXIndex - subspacingNumber;
                     }
-                    else if (nbcell_xdim_ind <= subspacing_number-1 && nbcell_xdim_ind >= 0)
+                    else if (neighbourCellXIndex <= subspacingNumber-1 && neighbourCellXIndex >= 0)
                     {
-                        subspace_cell_neighbors[subspace_xcoord][subspace_ycoord][neighbor_ind][0] =
-                                nbcell_xdim_ind;
+                        subspaceCellNeighbours[subspaceXCoordinate][subspaceYCoordinate][neighbourIndex][0] =
+                                neighbourCellXIndex;
                     }
                     // y
-                    if (nbcell_ydim_ind < 0 && pbc)
+                    if (neighbourCellYIndex < 0 && periodicBoundaryConditions)
                     {
-                        subspace_cell_neighbors[subspace_xcoord][subspace_ycoord][neighbor_ind][1] =
-                                nbcell_ydim_ind + subspacing_number;
+                        subspaceCellNeighbours[subspaceXCoordinate][subspaceYCoordinate][neighbourIndex][1] =
+                                neighbourCellYIndex + subspacingNumber;
                     }
-                    else if (nbcell_ydim_ind > subspacing_number-1 && pbc)
+                    else if (neighbourCellYIndex > subspacingNumber-1 && periodicBoundaryConditions)
                     {
-                        subspace_cell_neighbors[subspace_xcoord][subspace_ycoord][neighbor_ind][1] =
-                                nbcell_ydim_ind - subspacing_number;
+                        subspaceCellNeighbours[subspaceXCoordinate][subspaceYCoordinate][neighbourIndex][1] =
+                                neighbourCellYIndex - subspacingNumber;
                     }
-                    else if (nbcell_ydim_ind <= subspacing_number-1 && nbcell_ydim_ind >= 0)
+                    else if (neighbourCellYIndex <= subspacingNumber-1 && neighbourCellYIndex >= 0)
                     {
-                        subspace_cell_neighbors[subspace_xcoord][subspace_ycoord][neighbor_ind][1] =
-                                nbcell_ydim_ind;
+                        subspaceCellNeighbours[subspaceXCoordinate][subspaceYCoordinate][neighbourIndex][1] =
+                                neighbourCellYIndex;
                     }
 
                     if (debug){std::cout << "nb_x: " <<
-                        subspace_cell_neighbors[subspace_xcoord][subspace_ycoord][neighbor_ind][0] << "\tnb_y: " <<
-                        subspace_cell_neighbors[subspace_xcoord][subspace_ycoord][neighbor_ind][1] << std::endl;}
+                        subspaceCellNeighbours[subspaceXCoordinate][subspaceYCoordinate][neighbourIndex][0] << "\tnb_y: " <<
+                        subspaceCellNeighbours[subspaceXCoordinate][subspaceYCoordinate][neighbourIndex][1] << std::endl;}
 
-                    neighbor_ind++;
+                    neighbourIndex++;
                 }
             }
         }
     }
-    return subspace_cell_neighbors;
+    return subspaceCellNeighbours;
 }
 
 
 
 // determine actual interactions between agent in subspace and its neighbors
-std::vector<std::vector<int> > get_interacting_neighbors(
-        std::vector < std::vector < std::vector < std::vector<int> > > > subspace_cell_neighbors,
-        std::vector<std::vector<std::vector<int> > > subspace_allocation,
-        int expected_agentnumber_per_subspace, int subspacing_number, int dim,
-        double neighborhood_radius, std::vector<std::vector<double> > positions,
-        int agent_number, double box_size, bool pbc, bool debug
+std::vector<std::vector<int> > getInteractingNeighbours(
+        std::vector < std::vector < std::vector < std::vector<int> > > > subspaceCellNeighbours,
+        std::vector<std::vector<std::vector<int> > > subspaceAllocation,
+        int expectedAgentNumberPerSubspace, int subspacingNumber, int dim,
+        double neighbourhoodRadius, std::vector<std::vector<double> > positions,
+        int agentNumber, double boxSize, bool periodicBoundaryConditions, bool debug
         )
 {
     // initialize interaction container
-    std::vector<std::vector<int> > interacting_neighbors(agent_number,
-            std::vector<int>() ); //expected_agentnumber_per_subspace * 5) );
+    std::vector<std::vector<int> > interactingNeighbours(agentNumber,
+            std::vector<int>() ); //expectedAgentNumberPerSubspace * 5) );
 
     // iterate through subspace grid
-    for (int subspace_xcoord = 0; subspace_xcoord < subspacing_number; subspace_xcoord++)
+    for (int subspaceXCoordinate = 0; subspaceXCoordinate < subspacingNumber; subspaceXCoordinate++)
     {
-        for (int subspace_ycoord = 0; subspace_ycoord < subspacing_number; subspace_ycoord++)
+        for (int subspaceYCoordinate = 0; subspaceYCoordinate < subspacingNumber; subspaceYCoordinate++)
         {
-            if (debug){std::cout << "\n=====BASE_CELL=====\nx: " << subspace_xcoord << "\ty: " << subspace_ycoord << std::endl;}
+            if (debug){std::cout << "\n=====BASE_CELL=====\nx: " << subspaceXCoordinate << "\ty: " << subspaceYCoordinate << std::endl;}
 
             // iterate through all agent_inds in one subspace cell
-            for (int subsp_agent_ind = 0; subsp_agent_ind < subspace_allocation[subspace_xcoord][subspace_ycoord].size();
-                subsp_agent_ind++)
+            for (int subspaceAgentIndex = 0; subspaceAgentIndex < subspaceAllocation[subspaceXCoordinate][subspaceYCoordinate].size();
+                subspaceAgentIndex++)
             {
                 // retrieve agent index of agent in subspace cell
-                int agent_ind = subspace_allocation[subspace_xcoord][subspace_ycoord][subsp_agent_ind];
+                int agentIndex = subspaceAllocation[subspaceXCoordinate][subspaceYCoordinate][subspaceAgentIndex];
 
-                if (debug){std::cout << "\n>>> treating subsp_agent " << subsp_agent_ind << "\tof " <<
-                    subspace_allocation[subspace_xcoord][subspace_ycoord].size() <<
-                    " in this cell\n with agent_ind "<< agent_ind << std::endl;}
+                if (debug){std::cout << "\n>>> treating subsp_agent " << subspaceAgentIndex << "\tof " <<
+                    subspaceAllocation[subspaceXCoordinate][subspaceYCoordinate].size() <<
+                    " in this cell\n with agentIndex "<< agentIndex << std::endl;}
 
                 // iterate through all neighboring cells to this cell
-                for (int nbcell_ind = 0; nbcell_ind < static_cast<int>(std::pow(dim+1, 2) ); nbcell_ind++)
+                for (int neighbourCellIndex = 0; neighbourCellIndex < static_cast<int>(std::pow(dim+1, 2) ); neighbourCellIndex++)
                 {
                     // retrieve x and y coords of current neighboring subspace cell
-                    int subsp_neighbor_xcoord = subspace_cell_neighbors[subspace_xcoord][subspace_ycoord][nbcell_ind][0];
-                    int subsp_neighbor_ycoord = subspace_cell_neighbors[subspace_xcoord][subspace_ycoord][nbcell_ind][1];
+                    int subspaceNeighbourXCoordinate = subspaceCellNeighbours[subspaceXCoordinate][subspaceYCoordinate][neighbourCellIndex][0];
+                    int subspaceNeighbourYCoordinate = subspaceCellNeighbours[subspaceXCoordinate][subspaceYCoordinate][neighbourCellIndex][1];
 
-                    if (debug){std::cout << "\n********INTERACTING_CELL\nneighborcell_x: " << subsp_neighbor_xcoord <<
-                    "\tneighborcell_y: " << subsp_neighbor_ycoord << std::endl;}
+                    if (debug){std::cout << "\n********INTERACTING_CELL\nneighborcell_x: " << subspaceNeighbourXCoordinate <<
+                    "\tneighborcell_y: " << subspaceNeighbourYCoordinate << std::endl;}
 
 
                     // access agent indices in neighboring cells
-                    for (int neighbor_ind = 0;
-                        neighbor_ind < subspace_allocation[subsp_neighbor_xcoord][subsp_neighbor_ycoord].size();
-                        neighbor_ind++)
+                    for (int neighbourIndex = 0;
+                        neighbourIndex < subspaceAllocation[subspaceNeighbourXCoordinate][subspaceNeighbourYCoordinate].size();
+                        neighbourIndex++)
                     {
                         // retrieve agent index of neighboring agent
-                        int nb_agent_ind = subspace_allocation[subsp_neighbor_xcoord][subsp_neighbor_ycoord][neighbor_ind];
+                        int neighbourAgentIndex = subspaceAllocation[subspaceNeighbourXCoordinate][subspaceNeighbourYCoordinate][neighbourIndex];
 
-                        if (debug){std::cout << ">>> neighbor  " << neighbor_ind << "\tof " <<
-                        subspace_allocation[subsp_neighbor_xcoord][subsp_neighbor_ycoord].size() <<
-                        "\t with agent_ind "<< nb_agent_ind << std::endl;}
+                        if (debug){std::cout << ">>> neighbor  " << neighbourIndex << "\tof " <<
+                        subspaceAllocation[subspaceNeighbourXCoordinate][subspaceNeighbourYCoordinate].size() <<
+                        "\t with agentIndex "<< neighbourAgentIndex << std::endl;}
 
 
                         // compute distance between subsp_agent and subsp_neighbor_agent (2D hardcoded)
-                        double xdistance = fabs(positions[nb_agent_ind][0] - positions[agent_ind][0]);
-                        double ydistance = fabs(positions[nb_agent_ind][1] - positions[agent_ind][1]);
+                        double xDistance = fabs(positions[neighbourAgentIndex][0] - positions[agentIndex][0]);
+                        double yDistance = fabs(positions[neighbourAgentIndex][1] - positions[agentIndex][1]);
 
                         // treat pbcs (hardcoded)
-                        if (xdistance > (box_size/2) && pbc)
+                        if (xDistance > (boxSize/2) && periodicBoundaryConditions)
                         {
-                            xdistance = box_size - xdistance;
+                            xDistance = boxSize - xDistance;
                         }
-                        if (ydistance > (box_size/2) && pbc)
+                        if (yDistance > (boxSize/2) && periodicBoundaryConditions)
                         {
-                            ydistance = box_size - ydistance;
+                            yDistance = boxSize - yDistance;
                         }
 
                         // compute actual distance
-                        double distance = sqrt( std::pow( xdistance, 2 ) + std::pow( ydistance, 2 ) );
+                        double distance = sqrt( std::pow( xDistance, 2 ) + std::pow( yDistance, 2 ) );
 
-                        // decide on interaction between these two agents based on neighborhood_radius
-                        if (distance <= neighborhood_radius && agent_ind != nb_agent_ind)
+                        // decide on interaction between these two agents based on neighbourhoodRadius
+                        if (distance <= neighbourhoodRadius && agentIndex != neighbourAgentIndex)
                         {
-                            interacting_neighbors[agent_ind].push_back(nb_agent_ind);
+                            interactingNeighbours[agentIndex].push_back(neighbourAgentIndex);
 
                             if (debug){std::cout << "\t dist: " << distance << "\t interact: true" << std::endl;}
                         }
@@ -207,7 +207,7 @@ std::vector<std::vector<int> > get_interacting_neighbors(
         if (debug){std::cout << "===================\n" << std::endl;}
         }
     }
-    return interacting_neighbors;
+    return interactingNeighbours;
 }
 
 

@@ -12,4 +12,4 @@
 # file for normal output
 #SBATCH --output=Slurmjob_%N_%j.out
 cd /scratch/fermi/horton/Paper/main1/src/
-./main.out 131072 0.560 3 ../data7/observables/delay_3/ ../data7/snapshot/delay_3/
+./main.out 131072 0.560 3 ../data7/observables/ ../data7/snapshot/ ../data7/animations/

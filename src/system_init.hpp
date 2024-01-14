@@ -1,3 +1,4 @@
+// This function is a useful for producing random seeds
 unsigned long mix(unsigned long a, unsigned long b, unsigned long c)
 {
     a=a-b;  a=a-c;  a=a^(c >> 13);
@@ -12,32 +13,31 @@ unsigned long mix(unsigned long a, unsigned long b, unsigned long c)
     return c;
 }
 
-
-std::vector<std::vector<double> > positions_init(int agent_number, 
-    double box_size, int dim, std::mt19937& gen, std::string init_mode, int delayTime, double noise_strength)
+std::vector<std::vector<double> > initialisePosition(int agentNumber, 
+    double boxSize, int dim, std::mt19937& gen, std::string initialisationMode, int delayTime, double noiseStrength)
 {
-    std::vector<std::vector<double> > positions(agent_number, 
+    std::vector<std::vector<double> > positions(agentNumber, 
         std::vector<double>(dim));
     // saves current positions for each agent
     
-    if (init_mode == "random_uniform")
+    if (initialisationMode == "random_uniform")
     {
-        // RNG: draw from [0;box_size)
-        std::uniform_real_distribution<> dis(0.0, box_size);
+        // RNG: draw from [0;boxSize)
+        std::uniform_real_distribution<> dis(0.0, boxSize);
 
         // draw for each agent, for each dimension one random number
-        for (int agent_ind = 0; agent_ind < agent_number; agent_ind++)
+        for (int agentIndex = 0; agentIndex < agentNumber; agentIndex++)
         {
-            for (int dim_ind = 0; dim_ind < dim; dim_ind++)
+            for (int dimensionIndex = 0; dimensionIndex < dim; dimensionIndex++)
             {
-                positions[agent_ind][dim_ind] = dis(gen);
+                positions[agentIndex][dimensionIndex] = dis(gen);
             }
         }
     }
 
-    if (init_mode == "continue")
+    if (initialisationMode == "continue")
     { 
-        std::ifstream inputFile("../dataContinue/snapshot/delay_"+std::to_string(delayTime)+"/snapshot_eta_"+std::to_string(noise_strength)+"_delay_"+std::to_string(delayTime)+".txt");
+        std::ifstream inputFile("../dataContinue/snapshot/delay_"+std::to_string(delayTime)+"/snapshot_eta_"+std::to_string(noiseStrength)+"_delay_"+std::to_string(delayTime)+".txt");
         
         std::string line;
 
@@ -55,33 +55,33 @@ std::vector<std::vector<double> > positions_init(int agent_number,
     return positions;
 }
 
-std::vector<std::vector<double> > angles_init(int agent_number, 
-    double box_size, int dim, double angle_interval_low, double angle_interval_high,
-    std::mt19937& gen, std::string init_mode, int delayTime, double noise_strength)
+std::vector<std::vector<double> > initialiseAngles(int agentNumber, 
+    double boxSize, int dim, double angleIntervalHigh, double angleIntervalLow,
+    std::mt19937& gen, std::string initialisationMode, int delayTime, double noiseStrength)
 {
-    std::vector<std::vector<double> > angles(agent_number, 
+    std::vector<std::vector<double> > angles(agentNumber, 
         std::vector<double>(dim-1));
     // saves current angles
  
-    if (init_mode == "random_uniform")
+    if (initialisationMode == "random_uniform")
     {
-        // RNG: draw from [0;box_size)
-        std::uniform_real_distribution<> dis(angle_interval_low, angle_interval_high);
+        // RNG: draw from [0;boxSize)
+        std::uniform_real_distribution<> dis(angleIntervalHigh, angleIntervalLow);
         // CAUTION: for generalization to 3D adapt random interval
         
         // draw for each agent, for each dimension one random number
-        for (int agent_ind = 0; agent_ind < agent_number; agent_ind++)
+        for (int agentIndex = 0; agentIndex < agentNumber; agentIndex++)
         {
-            for (int dim_ind = 0; dim_ind < dim-1; dim_ind++)
+            for (int dimensionIndex = 0; dimensionIndex < dim-1; dimensionIndex++)
             {
-                angles[agent_ind][dim_ind] = dis(gen);
+                angles[agentIndex][dimensionIndex] = dis(gen);
             }
         }
     }
 
-    if (init_mode == "continue")
+    if (initialisationMode == "continue")
     {
-        std::ifstream inputFile("../dataContinue/snapshot/delay_"+std::to_string(delayTime)+"/snapshot_eta_"+std::to_string(noise_strength)+"_delay_"+std::to_string(delayTime)+".txt");
+        std::ifstream inputFile("../dataContinue/snapshot/delay_"+std::to_string(delayTime)+"/snapshot_eta_"+std::to_string(noiseStrength)+"_delay_"+std::to_string(delayTime)+".txt");
         
         std::string line;
 

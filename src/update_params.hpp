@@ -5,45 +5,45 @@ template <typename T> int sgn(T val) {
 
 
 // updates the positions of all agents from time t to t+1
-void update_positions(int agent_number, int dim, std::vector<std::vector<double> > &positions,
-	std::vector<std::vector<double> > angles, double velocity, double time_step, double box_size)
+void updatePositions(int agentNumber, int dim, std::vector<std::vector<double> > &positions,
+	std::vector<std::vector<double> > angles, double velocity, double timeStep, double boxSize)
 {
     // 2D hard-coded: consider only one angular dimension
-    int dim_angle_ind = 0;
+    int dimensionAngleIndex = 0;
 
-	for (int agent_ind = 0; agent_ind < agent_number; agent_ind++)
+	for (int agentIndex = 0; agentIndex < agentNumber; agentIndex++)
 	{
-	    // iterate over all spatial dimensions (dim_pos_ind)
-		for (int dim_pos_ind = 0; dim_pos_ind < dim; dim_pos_ind++)
+	    // iterate over all spatial dimensions (dimensionPositionIndex)
+		for (int dimensionPositionIndex = 0; dimensionPositionIndex < dim; dimensionPositionIndex++)
 		{
-			if (dim_pos_ind == 0)
+			if (dimensionPositionIndex == 0)
 			{
 				//differential equation
-				positions[agent_ind][dim_pos_ind] += velocity * cos(angles[agent_ind][dim_angle_ind]) * time_step;
+				positions[agentIndex][dimensionPositionIndex] += velocity * cos(angles[agentIndex][dimensionAngleIndex]) * timeStep;
 
 				//periodic boundary conditions
-				if (positions[agent_ind][dim_pos_ind] >= box_size)
+				if (positions[agentIndex][dimensionPositionIndex] >= boxSize)
 				{
-					positions[agent_ind][dim_pos_ind] -= box_size;
+					positions[agentIndex][dimensionPositionIndex] -= boxSize;
 				}
-				if (positions[agent_ind][dim_pos_ind] < 0)
+				if (positions[agentIndex][dimensionPositionIndex] < 0)
 				{
-					positions[agent_ind][dim_pos_ind] += box_size;
+					positions[agentIndex][dimensionPositionIndex] += boxSize;
 				}
 			}
-			if (dim_pos_ind == 1)
+			if (dimensionPositionIndex == 1)
 			{
                 //differential equation
-				positions[agent_ind][dim_pos_ind] += velocity * sin(angles[agent_ind][dim_angle_ind]) * time_step;
+				positions[agentIndex][dimensionPositionIndex] += velocity * sin(angles[agentIndex][dimensionAngleIndex]) * timeStep;
 
                 //periodic boundary condition
-				if (positions[agent_ind][dim_pos_ind] >= box_size)
+				if (positions[agentIndex][dimensionPositionIndex] >= boxSize)
 				{
-					positions[agent_ind][dim_pos_ind] -= box_size;
+					positions[agentIndex][dimensionPositionIndex] -= boxSize;
 				}
-				if (positions[agent_ind][dim_pos_ind] < 0)
+				if (positions[agentIndex][dimensionPositionIndex] < 0)
 				{
-					positions[agent_ind][dim_pos_ind] += box_size;
+					positions[agentIndex][dimensionPositionIndex] += boxSize;
 				}
 			}
 		}
@@ -52,25 +52,25 @@ void update_positions(int agent_number, int dim, std::vector<std::vector<double>
 
 
 // updates the angles of all agents from time t to t+1
-std::vector<std::vector<double> > sumNeighbourangles(int agent_number, int dim, 
+std::vector<std::vector<double> > sumNeighbourAngles(int agentNumber, int dim, 
 												std::vector<std::vector<double> > savedAngles,
-												double noise_strength, std::vector<std::vector<int> > interacting_neighbors, double angle_interval_low,
-												double angle_interval_high)
+												double noiseStrength, std::vector<std::vector<int> > interactingNeighbours, double angleIntervalLow,
+												double angleIntervalHigh)
 {
 
 	
 
 	// Create temporary vector
-	std::vector<std::vector<double> > tempAngles(agent_number, 
+	std::vector<std::vector<double> > tempAngles(agentNumber, 
         std::vector<double>(dim-1));
 
-	for (int agent_ind = 0; agent_ind < agent_number; agent_ind++)
+	for (int agentIndex = 0; agentIndex < agentNumber; agentIndex++)
 	{
 
 	    // treat all angular dimensions
-		for (int dim_ind = 0; dim_ind < dim - 1; dim_ind++)
+		for (int dimensionIndex = 0; dimensionIndex < dim - 1; dimensionIndex++)
 		{
-			if (dim_ind == 0)
+			if (dimensionIndex == 0)
 			{
 			    // summation of complex exponentials exp(i*theta) (take mean of circular quantity)
 				const std::complex<double> i(0,1);
@@ -78,11 +78,11 @@ std::vector<std::vector<double> > sumNeighbourangles(int agent_number, int dim,
 
 				// integration of the stochastic differential equations
 				// angular update: following the original Vicsek paper
-				for (int interact_neighbor_ind = 0; interact_neighbor_ind < interacting_neighbors[agent_ind].size();
+				for (int interact_neighbor_ind = 0; interact_neighbor_ind < interactingNeighbours[agentIndex].size();
 				    interact_neighbor_ind++)
 				{
-					int selected_agent_ind = interacting_neighbors[agent_ind][interact_neighbor_ind];
-                    std::complex<double> agent_angle = std::polar(1.0, savedAngles[selected_agent_ind][dim_ind]);
+					int selected_agent_ind = interactingNeighbours[agentIndex][interact_neighbor_ind];
+                    std::complex<double> agent_angle = std::polar(1.0, savedAngles[selected_agent_ind][dimensionIndex]);
 					exp_sum += agent_angle;
                     
 					
@@ -90,26 +90,26 @@ std::vector<std::vector<double> > sumNeighbourangles(int agent_number, int dim,
 			
 				exp_sum = std::norm(exp_sum);
 				// obtain argument of complex exponential and add noise
-                tempAngles[agent_ind][dim_ind] = static_cast<double>(std::arg(exp_sum));
+                tempAngles[agentIndex][dimensionIndex] = static_cast<double>(std::arg(exp_sum));
 
                 // pbc, put angles into [-pi,pi) by subtracting or adding 2pi
-				if (tempAngles[agent_ind][dim_ind] > angle_interval_high)
+				if (tempAngles[agentIndex][dimensionIndex] > angleIntervalHigh)
 				{ 
-					tempAngles[agent_ind][dim_ind] -= 2 * atan(1) * 4;
+					tempAngles[agentIndex][dimensionIndex] -= 2 * atan(1) * 4;
 				}
-				else if (tempAngles[agent_ind][dim_ind] <= angle_interval_low)
+				else if (tempAngles[agentIndex][dimensionIndex] <= angleIntervalLow)
 				{
-					tempAngles[agent_ind][dim_ind] += 2 * atan(1) * 4;
+					tempAngles[agentIndex][dimensionIndex] += 2 * atan(1) * 4;
 				}
 			}
 		}
 	}
 	
-	for (int agent_ind = 0; agent_ind < agent_number; agent_ind++)
+	for (int agentIndex = 0; agentIndex < agentNumber; agentIndex++)
         {
-            for (int dim_ind = 0; dim_ind < dim-1; dim_ind++)
+            for (int dimensionIndex = 0; dimensionIndex < dim-1; dimensionIndex++)
             {
-                savedAngles[agent_ind][dim_ind] = tempAngles[agent_ind][dim_ind];
+                savedAngles[agentIndex][dimensionIndex] = tempAngles[agentIndex][dimensionIndex];
             }
         }
 
@@ -119,26 +119,26 @@ std::vector<std::vector<double> > sumNeighbourangles(int agent_number, int dim,
 
 
 // updates the angles of all agents from time t to t+1
-std::vector<std::vector<double> > update_angles(int agent_number, int dim, std::vector<std::vector<double> > angles,
+std::vector<std::vector<double> > updateAngles(int agentNumber, int dim, std::vector<std::vector<double> > angles,
 	std::vector<std::vector<double> > savedAngles,
-	double noise_strength, std::vector<std::vector<int> > interacting_neighbors, double angle_interval_low,
-	double angle_interval_high, std::mt19937& gen, double polar_interact_prob)
+	double noiseStrength, std::vector<std::vector<int> > interactingNeighbours, double angleIntervalLow,
+	double angleIntervalHigh, std::mt19937& gen, double polar_interact_prob)
 {
 
 	// RNG: draw from [-pi;pi) (angular noise) and [0,1) (polar or nematic interactions)
-    std::uniform_real_distribution<> dis(angle_interval_low, angle_interval_high);
+    std::uniform_real_distribution<> dis(angleIntervalLow, angleIntervalHigh);
     std::uniform_real_distribution<> dis2(0, 1);
 	// Create temporary vector
-	std::vector<std::vector<double> > tempAngles(agent_number, 
+	std::vector<std::vector<double> > tempAngles(agentNumber, 
         std::vector<double>(dim-1));
 
-	for (int agent_ind = 0; agent_ind < agent_number; agent_ind++)
+	for (int agentIndex = 0; agentIndex < agentNumber; agentIndex++)
 	{
 
 	    // treat all angular dimensions
-		for (int dim_ind = 0; dim_ind < dim - 1; dim_ind++)
+		for (int dimensionIndex = 0; dimensionIndex < dim - 1; dimensionIndex++)
 		{
-			if (dim_ind == 0)
+			if (dimensionIndex == 0)
 			{
 			    // summation of complex exponentials exp(i*theta) (take mean of circular quantity)
 				const std::complex<double> i(0,1);
@@ -147,13 +147,13 @@ std::vector<std::vector<double> > update_angles(int agent_number, int dim, std::
 				// integration of the stochastic differential equations
 				// angular update: following the original Vicsek paper
 
-                std::complex<double> agentAngle = std::polar(1.0, angles[agent_ind][dim_ind]);
+                std::complex<double> agentAngle = std::polar(1.0, angles[agentIndex][dimensionIndex]);
 
-				for (int interact_neighbor_ind = 0; interact_neighbor_ind < interacting_neighbors[agent_ind].size();
+				for (int interact_neighbor_ind = 0; interact_neighbor_ind < interactingNeighbours[agentIndex].size();
 				    interact_neighbor_ind++)
 				{
-					int selected_agent_ind = interacting_neighbors[agent_ind][interact_neighbor_ind];
-                    std::complex<double> agent_angle = std::polar(1.0, savedAngles[selected_agent_ind][dim_ind]);
+					int selected_agent_ind = interactingNeighbours[agentIndex][interact_neighbor_ind];
+                    std::complex<double> agent_angle = std::polar(1.0, savedAngles[selected_agent_ind][dimensionIndex]);
 					neighbourhoodSum += agent_angle;
                     
 				}
@@ -161,28 +161,28 @@ std::vector<std::vector<double> > update_angles(int agent_number, int dim, std::
 				exp_sum = agentAngle + neighbourhoodSum;
 			
 				// obtain argument of complex exponential and add noise
-                tempAngles[agent_ind][dim_ind] = static_cast<double>(std::arg(exp_sum)) + noise_strength*dis(gen);
+                tempAngles[agentIndex][dimensionIndex] = static_cast<double>(std::arg(exp_sum)) + noiseStrength*dis(gen);
 
 
                 // pbc, put angles into [-pi,pi) by subtracting or adding 2pi
-				if (tempAngles[agent_ind][dim_ind] > angle_interval_high)
+				if (tempAngles[agentIndex][dimensionIndex] > angleIntervalHigh)
 				{ 
-					tempAngles[agent_ind][dim_ind] -= 2 * atan(1) * 4;
+					tempAngles[agentIndex][dimensionIndex] -= 2 * atan(1) * 4;
 				}
-				else if (tempAngles[agent_ind][dim_ind] <= angle_interval_low)
+				else if (tempAngles[agentIndex][dimensionIndex] <= angleIntervalLow)
 				{
-					tempAngles[agent_ind][dim_ind] += 2 * atan(1) * 4;
+					tempAngles[agentIndex][dimensionIndex] += 2 * atan(1) * 4;
 				}
 			}
 		}
 	}
 	
-	for (int agent_ind = 0; agent_ind < agent_number; agent_ind++)
+	for (int agentIndex = 0; agentIndex < agentNumber; agentIndex++)
         {
-            for (int dim_ind = 0; dim_ind < dim-1; dim_ind++)
+            for (int dimensionIndex = 0; dimensionIndex < dim-1; dimensionIndex++)
             {	
 
-                angles[agent_ind][dim_ind] = tempAngles[agent_ind][dim_ind];
+                angles[agentIndex][dimensionIndex] = tempAngles[agentIndex][dimensionIndex];
             }
         }
 

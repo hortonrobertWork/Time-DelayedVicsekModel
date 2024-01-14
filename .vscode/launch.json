@@ -10,7 +10,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/src/main.out",
-            "args": ["131072", "0.610", "1", "../dataContinue/observables/delay_1/", "../dataContinue/snapshotOutput/delay_1/"],
+            "args": ["131072", "0.4", "0", "../data7/observables/", "../data7/snapshot/", "../data7/animations/"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
